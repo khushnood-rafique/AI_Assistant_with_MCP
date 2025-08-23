@@ -25,6 +25,8 @@ def check_availability_by_doctor(desired_date:DateModel, doctor_name:Literal['ke
         output += "Available slots: " + ', '.join(rows)
 
     return output
+
+
 @tool
 def check_availability_by_specialization(desired_date:DateModel, specialization:Literal["general_dentist", "cosmetic_dentist", "prosthodontist", "pediatric_dentist","emergency_dentist","oral_surgeon","orthodontist"]):
     """
@@ -57,6 +59,8 @@ def check_availability_by_specialization(desired_date:DateModel, specialization:
             output += row[1] + ". Available slots: \n" + ', \n'.join([convert_to_am_pm(value)for value in row[2]])+'\n'
 
     return output
+
+
 @tool
 def set_appointment(desired_date:DateTimeModel, id_number:IdentificationNumberModel, doctor_name:Literal['kevin anderson','robert martinez','susan davis','daniel miller','sarah wilson','michael green','lisa brown','jane smith','emily johnson','john doe']):
     """
@@ -82,6 +86,8 @@ def set_appointment(desired_date:DateTimeModel, id_number:IdentificationNumberMo
         df.to_csv(f'availability.csv', index = False)
 
         return "Successfully done"
+    
+
 @tool
 def cancel_appointment(date:DateTimeModel, id_number:IdentificationNumberModel, doctor_name:Literal['kevin anderson','robert martinez','susan davis','daniel miller','sarah wilson','michael green','lisa brown','jane smith','emily johnson','john doe']):
     """
@@ -91,12 +97,14 @@ def cancel_appointment(date:DateTimeModel, id_number:IdentificationNumberModel, 
     df = pd.read_csv(r"doctor_availability.csv")
     case_to_remove = df[(df['date_slot'] == date.date)&(df['patient_to_attend'] == id_number.id)&(df['doctor_name'] == doctor_name)]
     if len(case_to_remove) == 0:
-        return "You don´t have any appointment with that specifications"
+        return "You don't have any appointment with that specifications"
     else:
         df.loc[(df['date_slot'] == date.date) & (df['patient_to_attend'] == id_number.id) & (df['doctor_name'] == doctor_name), ['is_available', 'patient_to_attend']] = [True, None]
         df.to_csv(f'availability.csv', index = False)
 
         return "Successfully cancelled"
+    
+    
 @tool
 def reschedule_appointment(old_date:DateTimeModel, new_date:DateTimeModel, id_number:IdentificationNumberModel, doctor_name:Literal['kevin anderson','robert martinez','susan davis','daniel miller','sarah wilson','michael green','lisa brown','jane smith','emily johnson','john doe']):
     """
@@ -107,7 +115,7 @@ def reschedule_appointment(old_date:DateTimeModel, new_date:DateTimeModel, id_nu
     df = pd.read_csv(r"doctor_availability.csv")
     available_for_desired_date = df[(df['date_slot'] == new_date.date)&(df['is_available'] == True)&(df['doctor_name'] == doctor_name)]
     if len(available_for_desired_date) == 0:
-        return "Not available slots in the desired period"
+        return "No available slots in the desired period"
     else:
         cancel_appointment.invoke({'date':old_date, 'id_number':id_number, 'doctor_name':doctor_name})
         set_appointment.invoke({'desired_date':new_date, 'id_number': id_number, 'doctor_name': doctor_name})
